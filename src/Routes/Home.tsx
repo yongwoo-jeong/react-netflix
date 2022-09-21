@@ -1,6 +1,11 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { getMovies, IGetMoviesResult } from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
@@ -89,6 +94,16 @@ const Overlay = styled(motion.div)`
   opacity: 0;
 `;
 
+const BigMovie = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  background-color: red;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+`;
+
 const rowVariants = {
   hidden: {
     x: window.outerWidth + 5,
@@ -132,6 +147,8 @@ const offset = 6;
 function Home() {
   const navigate = useNavigate();
   const bigMovieMatch = useMatch("/movies/:movieId");
+  const { scrollY } = useScroll();
+  const setScrollY = useTransform(scrollY, (value) => value + 50);
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "nowPlaying"],
     getMovies
@@ -209,19 +226,13 @@ function Home() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 ></Overlay>
-                <motion.div
+                {/*  */}
+                {/* Be replaced as Component with Detail */}
+                {/*  */}
+                <BigMovie
+                  style={{ top: setScrollY }}
                   layoutId={bigMovieMatch.params.movieId}
-                  style={{
-                    position: "absolute",
-                    width: "40vw",
-                    height: "80vh",
-                    backgroundColor: "red",
-                    top: 50,
-                    left: 0,
-                    right: 0,
-                    margin: "0 auto",
-                  }}
-                ></motion.div>
+                ></BigMovie>
               </>
             ) : null}
           </AnimatePresence>
