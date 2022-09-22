@@ -1,7 +1,8 @@
-import { Link, useMatch } from "react-router-dom";
+import { Link, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { motion, useAnimation, useScroll } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 const Nav = styled(motion.nav)`
   display: flex;
@@ -44,7 +45,7 @@ const Item = styled.li`
     color: ${(props) => props.theme.white.lighter};
   }
 `;
-const Search = styled.span`
+const Search = styled.form`
   color: white;
   display: flex;
   align-items: center;
@@ -77,6 +78,14 @@ const Input = styled(motion.input)`
   border: 1px solid ${(props) => props.theme.white.lighter};
 `;
 
+const ErrorSpan = styled(motion.span)`
+  position: relative;
+  bottom: -30px;
+  left: -6px;
+  font-size: 16px;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
 const logoVariants = {
   normal: {
     fillOpacity: 1,
@@ -93,6 +102,10 @@ const navVariants = {
   up: { backgroundColor: "rgba(0,0,0,0)" },
   scrollDown: { backgroundColor: "rgba(0,0,0,1)" },
 };
+
+interface IForm {
+  keyword: string;
+}
 
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -122,6 +135,15 @@ function Header() {
       }
     });
   }, [scrollY, navAnimation]);
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IForm>();
+  const onVaild = (data: IForm) => {
+    navigate(`/search?keyword=${data.keyword}`);
+  };
   return (
     <Nav variants={navVariants} animate={navAnimation} initial={"up"}>
       <Col>
@@ -152,28 +174,39 @@ function Header() {
         </Items>
       </Col>
       <Col>
-        <Search>
-          <motion.svg
-            onClick={togleSearch}
-            animate={{ x: searchOpen ? -180 : 0 }}
-            transition={{ type: "linear" }}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              clipRule="evenodd"
-            ></path>
-          </motion.svg>
-          <Input
-            animate={inputAnimation}
-            initial={{ scaleX: 0 }}
-            transition={{ type: "linear" }}
-            placeholder="Search for a movie or tv show"
-          />
-        </Search>
+        <>
+          {errors && <ErrorSpan>{errors.keyword?.message}</ErrorSpan>}
+          <Search onSubmit={handleSubmit(onVaild)}>
+            <motion.svg
+              style={{ cursor: "pointer" }}
+              onClick={togleSearch}
+              animate={{ x: searchOpen ? -180 : 0 }}
+              transition={{ type: "linear" }}
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clipRule="evenodd"
+              ></path>
+            </motion.svg>
+            <Input
+              {...register("keyword", {
+                required: "검색어를 입력하세요.",
+                minLength: {
+                  value: 2,
+                  message: "2 자 이상 입력해주세요.",
+                },
+              })}
+              animate={inputAnimation}
+              initial={{ scaleX: 0 }}
+              transition={{ type: "linear" }}
+              placeholder="Search for a movie or tv show"
+            />
+          </Search>
+        </>
       </Col>
     </Nav>
   );

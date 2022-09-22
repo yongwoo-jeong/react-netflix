@@ -198,7 +198,6 @@ function Home() {
     data?.results.find(
       (movie) => movie.id + "" === bigMovieMatch.params.movieId
     );
-
   return (
     <Wrapper>
       {isLoading ? (
