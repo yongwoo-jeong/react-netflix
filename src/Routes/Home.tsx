@@ -101,9 +101,9 @@ const BigMovie = styled(motion.div)`
   left: 0;
   right: 0;
   margin: 0 auto;
-  background-color: ${(props) => props.theme.black.lighter};
   border-radius: 15px;
   overflow: hidden;
+  background-color: ${(props) => props.theme.black.lighter};
 `;
 
 const BigCover = styled.div`
@@ -123,6 +123,7 @@ const BigTitle = styled.h3`
 
 const BigOverview = styled.p`
   padding: 20px;
+  position: relative;
   top: -80px;
   color: ${(props) => props.theme.white.lighter};
 `;
