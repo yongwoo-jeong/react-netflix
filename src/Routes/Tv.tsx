@@ -6,7 +6,7 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import { getMovies, getPopTvs, IGetMoviesResult } from "../api";
+import { getPopTvs, IGetPopTvResult } from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
@@ -172,10 +172,10 @@ const offset = 6;
 
 function Tv() {
   const navigate = useNavigate();
-  const bigMovieMatch = useMatch("/movies/:movieId");
+  const bigTvMatch = useMatch("/tv/:tvId");
   const { scrollY } = useScroll();
   const setScrollY = useTransform(scrollY, (value) => value + 50);
-  const { data, isLoading } = useQuery<IGetMoviesResult>(
+  const { data, isLoading } = useQuery<IGetPopTvResult>(
     ["tvs", "nowPlaying"],
     getPopTvs
   );
@@ -191,15 +191,13 @@ function Tv() {
     }
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (movieId: number) => {
-    navigate(`/movies/${movieId}`);
+  const onBoxClicked = (tvId: number) => {
+    navigate(`/tv/${tvId}`);
   };
-  const onOverlayClick = () => navigate("/");
-  const clickedMovie =
-    bigMovieMatch?.params.movieId &&
-    data?.results.find(
-      (movie) => movie.id + "" === bigMovieMatch.params.movieId
-    );
+  const onOverlayClick = () => navigate("/tv");
+  const clickedTv =
+    bigTvMatch?.params.tvId &&
+    data?.results.find((movie) => movie.id + "" === bigTvMatch.params.tvId);
   return (
     <Wrapper>
       {isLoading ? (
@@ -210,7 +208,7 @@ function Tv() {
             onClick={increaseIndex}
             bgphoto={makeImagePath(data?.results[0].backdrop_path || "")}
           >
-            <Title>{data?.results[0].title}</Title>
+            <Title>{data?.results[0].name}</Title>
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
           <Slider>
@@ -226,21 +224,21 @@ function Tv() {
                 {data?.results
                   .slice(1)
                   .slice(offset * index, offset * index + offset)
-                  .map((movie) => (
+                  .map((tv) => (
                     <Box
-                      layoutId={movie.id + ""}
+                      layoutId={tv.id + ""}
                       variants={boxVariants}
-                      key={movie.id}
+                      key={tv.id}
                       initial="normal"
                       whileHover="hover"
                       onClick={() => {
-                        onBoxClicked(movie.id);
+                        onBoxClicked(tv.id);
                       }}
                       transition={{ type: "tween" }}
-                      bgphoto={makeImagePath(movie.backdrop_path, "w500")}
+                      bgphoto={makeImagePath(tv.backdrop_path, "w500")}
                     >
                       <Info variants={infoVariants}>
-                        <h4>{movie.title}</h4>
+                        <h4>{tv.name}</h4>
                       </Info>
                     </Box>
                   ))}
@@ -248,7 +246,7 @@ function Tv() {
             </AnimatePresence>
           </Slider>
           <AnimatePresence>
-            {bigMovieMatch ? (
+            {bigTvMatch ? (
               <>
                 <Overlay
                   onClick={onOverlayClick}
@@ -260,20 +258,20 @@ function Tv() {
                 {/*  */}
                 <BigMovie
                   style={{ top: setScrollY }}
-                  layoutId={bigMovieMatch.params.movieId}
+                  layoutId={bigTvMatch.params.tvId}
                 >
-                  {clickedMovie && (
+                  {clickedTv && (
                     <>
                       <BigCover
                         style={{
                           backgroundImage: `linear-gradient(to top,black,transparent),url(${makeImagePath(
-                            clickedMovie.backdrop_path,
+                            clickedTv.backdrop_path,
                             "w500"
                           )})`,
                         }}
                       />
-                      <BigTitle>{clickedMovie.title}</BigTitle>
-                      <BigOverview>{clickedMovie.overview}</BigOverview>
+                      <BigTitle>{clickedTv.name}</BigTitle>
+                      <BigOverview>{clickedTv.overview}</BigOverview>
                     </>
                   )}
                 </BigMovie>
